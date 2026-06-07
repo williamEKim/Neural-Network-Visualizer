@@ -19,3 +19,6 @@ pip install -r "$CURR_DIR/model/requirements.txt"
 
 echo "Installation complete! Executing model training..."
 python3 "$CURR_DIR/model/train.py"
+
+echo "Model Training Complete! Now executing export.py ..."
+python3 "$CURR_DIR/model/export.py"
