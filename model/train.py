@@ -67,34 +67,34 @@ def mse_loss(y_pred, y_true):
     return (1/len(y_pred)) * np.sum((y_pred - y_true) ** 2)
 
 
-def backward(x, y_true, activations, weights, biases):
+def backward(x, y_true, activations, z_list, weights):
     # x           — original input (784,)
     # y_true      — one-hot label (10,)
     # activations — list from forward(), one array per layer
     # weights     — list of weight matrices
     # biases      — list of bias vectors
     # return: grad_weights, grad_biases (same structure as weights, biases)
-    
+
     grad_weights = []
     grad_biases = []
 
     # Step 1 — output layer delta
-    delta = (activations[-1] - y_true) * sigmoid_prime(z_list[-1])
+    delta = (activations[-1] - y_true) * sigmoid_prime(z_list[-1])     # delta = ∂L/∂a * sigmoid_prime(z)
 
     # Step 2 — loop backward through layers
     for i in reversed(range(len(weights))):
         a_prev = activations[i]  # activation feeding INTO this layer
 
         # Step 3 — compute gradients for this layer
-        grad_w = _______________  # outer product of delta and a_prev
-        grad_b = _______________
+        grad_w = np.outer(delta, a_prev)  # outer product of delta and a_prev
+        grad_b = delta
 
         grad_weights.append(grad_w)
         grad_biases.append(grad_b)
 
         # pass delta backward (skip on last iteration — no layer before input)
         if i > 0:
-            delta = _______________  # W.T @ delta * sigmoid_prime(z_list[i-1])
+            delta = weights[i].T @ delta * sigmoid_prime(z_list[i-1])
 
     # reverse since we appended back-to-front
     grad_weights.reverse()
