@@ -5,10 +5,21 @@ import torchvision.transforms as transforms
 import json
 import copy
 import os
+from scipy.ndimage import rotate
 
+# -------------------- Flags / Macros --------------------
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(SCRIPT_DIR, '..', 'data')
 DEBUG = False
+LAYER_SIZES = [784, 100, 16, 16, 10]
+
+# -------------------- Helper functions --------------------
+def augment(x):
+    # x is a (784,) vector
+    img = x.reshape(28, 28)
+    angle = np.random.uniform(-15, 15)  # random rotation ±15 degrees
+    rotated = rotate(img, angle, reshape=False)
+    return np.clip(rotated, 0, 1).flatten()
 
 # -------------------- Activation functions --------------------
 def sigmoid(z):
@@ -139,6 +150,9 @@ def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
             grad_b_total = [np.zeros_like(b) for b in biases]  # same structure as biases, but all zeros
 
             for x, y in zip(x_batch, y_batch):
+                if np.random.random() < 0.5:  # 50% chance of augmentation
+                    x = augment(x)
+                    
                 y_enc = one_hot(y)
                 activations, z_list = forward(x, weights, biases)  # forward pass
                 gw, gb = backward(x, y_enc, activations, z_list, weights)  # backward pass
@@ -218,7 +232,6 @@ if __name__ == "__main__":
     x_train = x_train / 255.0   # pixel values varies [0.0, 255.0] so to normalize it, divide it by 255.0
 
     # Initializes the network
-    LAYER_SIZES = [784, 100, 50, 16, 10]
     weights, biases = initialize_network(LAYER_SIZES)
 
     # Trains + Evaluates and saves best weights
@@ -226,7 +239,7 @@ if __name__ == "__main__":
     best_weights = None
     best_biases = None
 
-    for epoch in range(30):
+    for epoch in range(50):
         weights, biases = train(weights, biases, x_train, y_train, epochs=1, lr=0.01, batch_size=32)
         accuracy = evaluate(weights, biases, x_test, y_test)
         
