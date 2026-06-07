@@ -4,6 +4,11 @@ from torchvision import datasets
 import torchvision.transforms as transforms
 import json
 import copy
+import os
+
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DATA_DIR = os.path.join(SCRIPT_DIR, '..', 'data')
+DEBUG = False
 
 # -------------------- Activation functions --------------------
 def sigmoid(z):
@@ -14,6 +19,10 @@ def sigmoid_prime(z):
     # derivative of sigmoid — you'll need this for backprop
     # σ'(z) = σ(z) * [1 - σ(z)]
     return  sigmoid(z) * (1 - sigmoid(z))
+
+def softmax(z):
+    e = np.exp(z - np.max(z))  # subtract max for numerical stability
+    return e / e.sum()
 
 # -------------------- Forward pass --------------------
 def forward(x, weights, biases):
@@ -30,7 +39,10 @@ def forward(x, weights, biases):
 
     for index, weight in enumerate(weights):
         z = weight @ a + biases[index]
-        a = sigmoid(z)
+        if index == len(weights) - 1:
+            a = softmax(z)   # output layer
+        else:
+            a = sigmoid(z)   # hidden layers
         activation_list.append(a)
         z_list.append(z)
 
@@ -68,6 +80,9 @@ def mse_loss(y_pred, y_true):
     # return a scalar loss value
     return (1/len(y_pred)) * np.sum((y_pred - y_true) ** 2)
 
+def cross_entropy_loss(y_pred, y_true):
+    return -np.sum(y_true * np.log(y_pred + 1e-9))
+
 
 # -------------------- Back Propagation --------------------
 def backward(x, y_true, activations, z_list, weights):
@@ -82,7 +97,7 @@ def backward(x, y_true, activations, z_list, weights):
     grad_biases = []
 
     # Step 1 — output layer delta
-    delta = (activations[-1] - y_true) * sigmoid_prime(z_list[-1])     # delta = ∂L/∂a * sigmoid_prime(z)
+    delta = activations[-1] - y_true    # delta = ∂L/∂a * sigmoid_prime(z)
 
     # Step 2 — loop backward through layers
     for i in reversed(range(len(weights))):
@@ -127,6 +142,7 @@ def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
                 y_enc = one_hot(y)
                 activations, z_list = forward(x, weights, biases)  # forward pass
                 gw, gb = backward(x, y_enc, activations, z_list, weights)  # backward pass
+                loss = cross_entropy_loss(activations[-1], y_enc)
 
                 # accumulate
                 for i in range(len(weights)):
@@ -137,6 +153,14 @@ def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
             for i in range(len(weights)):
                 weights[i] -= lr * (grad_w_total[i] / len(x_batch))
                 biases[i]  -= lr * (grad_b_total[i] / len(x_batch))
+
+            # DEBUG
+            if DEBUG and epoch == 0 and batch_start == 0:
+                print("Sample weight grad magnitudes:")
+                for i in range(len(weights)):
+                    print(f"  Layer {i}: mean abs grad = {np.mean(np.abs(grad_w_total[i])):.8f}")
+                activations_debug, _ = forward(x_batch[0], weights, biases)
+                print("Output activations:", activations_debug[-1])
 
         print(f"Epoch {epoch+1}/{epochs} done")
 
@@ -159,7 +183,7 @@ def evaluate(weights, biases, x_test, y_test):
 
     return correct_pred / len(x_test)
 
-def save_weights(weights, biases, path="model/weights.json"):
+def save_weights(weights, biases, path=None):
     # save weights and biases as JSON
     # hint: numpy arrays aren't JSON serializable — you need .tolist() on each one
     # hint: json.dump(data, f) writes to a file
@@ -170,6 +194,9 @@ def save_weights(weights, biases, path="model/weights.json"):
             for w, b in zip(weights, biases)
         ]
     }
+    
+    if path is None:
+        path = os.path.join(SCRIPT_DIR, 'weights.json')
 
     with open(path, "w") as f:
         json.dump(data, f)
@@ -177,8 +204,8 @@ def save_weights(weights, biases, path="model/weights.json"):
 
 if __name__ == "__main__":
     # Loads MNIST
-    train_data = datasets.MNIST(root='./data', train=True, download=True)
-    test_data  = datasets.MNIST(root='./data', train=False, download=True)
+    train_data = datasets.MNIST(root=DATA_DIR, train=True, download=True)
+    test_data  = datasets.MNIST(root=DATA_DIR, train=False, download=True)
 
     x_train = train_data.data.numpy()    # shape: (60000, 28, 28)
     x_train = x_train.reshape(-1, 784)   # flattens the shape from 28x28 to (60000, 784)
@@ -199,15 +226,19 @@ if __name__ == "__main__":
     best_weights = None
     best_biases = None
 
-    for epoch in range(10):
-        # train for one epoch
+    for epoch in range(30):
         weights, biases = train(weights, biases, x_train, y_train, epochs=1, lr=0.01, batch_size=32)
-
-        # evaluate
         accuracy = evaluate(weights, biases, x_test, y_test)
-        print(f"Epoch {epoch+1}: accuracy = {accuracy:.4f}")
+        
+        # compute avg loss on a small subset for monitoring
+        sample_losses = []
+        for x, y in zip(x_test[:500], y_test[:500]):
+            acts, _ = forward(x, weights, biases)
+            sample_losses.append(cross_entropy_loss(acts[-1], one_hot(y)))
+        avg_loss = np.mean(sample_losses)
+        
+        print(f"Epoch {epoch+1}: accuracy = {accuracy:.4f} | loss = {avg_loss:.4f}")
 
-        # save if best
         if accuracy > best_accuracy:
             best_accuracy = accuracy
             best_weights = copy.deepcopy(weights)
