@@ -18,18 +18,22 @@ def forward(x, weights, biases):
     # x is a (784,) vector
     # weights is a list of weight matrices, one per layer
     # biases is a list of bias vectors, one per layer
-    # return: list of activations for EACH layer (you'll need these for backprop)
+    # return: list of activations for EACH layer AND z values(you'll need these for backprop)
     activation_list = []
+    z_list = []
     a = x
 
     # add a initial activation layer to a list
     activation_list.append(a)
 
     for index, weight in enumerate(weights):
-        a = sigmoid(weight @ a + biases[index])
+        z = weight @ a + biases[index]
+        a = sigmoid(z)
         activation_list.append(a)
+        z_list.append(z)
 
-    return activation_list
+    return activation_list, z_list
+
 
 def initialize_network(layer_sizes):
     # layer_sizes = [784, 100, 50, 16, 10]
@@ -47,14 +51,13 @@ def initialize_network(layer_sizes):
 
     return weights, biases
 
+
 def one_hot(label, num_classes=10):
     # label is an int 0-9
     # return a (10,) vector of zeros with a 1 at index label
     v = np.zeros(num_classes)
     v[label] = 1.0
     return v
-
-
 
 def mse_loss(y_pred, y_true):
     # y_pred is the output activation (10,) vector
@@ -63,6 +66,7 @@ def mse_loss(y_pred, y_true):
     # return a scalar loss value
     return (1/len(y_pred)) * np.sum((y_pred - y_true) ** 2)
 
+
 def backward(x, y_true, activations, weights, biases):
     # x           — original input (784,)
     # y_true      — one-hot label (10,)
@@ -70,4 +74,30 @@ def backward(x, y_true, activations, weights, biases):
     # weights     — list of weight matrices
     # biases      — list of bias vectors
     # return: grad_weights, grad_biases (same structure as weights, biases)
-    pass
+    
+    grad_weights = []
+    grad_biases = []
+
+    # Step 1 — output layer delta
+    delta = (activations[-1] - y_true) * sigmoid_prime(z_list[-1])
+
+    # Step 2 — loop backward through layers
+    for i in reversed(range(len(weights))):
+        a_prev = activations[i]  # activation feeding INTO this layer
+
+        # Step 3 — compute gradients for this layer
+        grad_w = _______________  # outer product of delta and a_prev
+        grad_b = _______________
+
+        grad_weights.append(grad_w)
+        grad_biases.append(grad_b)
+
+        # pass delta backward (skip on last iteration — no layer before input)
+        if i > 0:
+            delta = _______________  # W.T @ delta * sigmoid_prime(z_list[i-1])
+
+    # reverse since we appended back-to-front
+    grad_weights.reverse()
+    grad_biases.reverse()
+
+    return grad_weights, grad_biases
