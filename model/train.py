@@ -62,3 +62,12 @@ def mse_loss(y_pred, y_true):
     # L = (1/n) * Σ (y_pred - y_true)^2
     # return a scalar loss value
     return (1/len(y_pred)) * np.sum((y_pred - y_true) ** 2)
+
+def backward(x, y_true, activations, weights, biases):
+    # x           — original input (784,)
+    # y_true      — one-hot label (10,)
+    # activations — list from forward(), one array per layer
+    # weights     — list of weight matrices
+    # biases      — list of bias vectors
+    # return: grad_weights, grad_biases (same structure as weights, biases)
+    pass
