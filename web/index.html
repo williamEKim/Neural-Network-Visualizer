@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Network Visualizer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <button class="hamburger" id="hamburger-btn" aria-label="Open controls">
+    <span></span><span></span><span></span>
+  </button>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <span class="sidebar-title">Controls</span>
+      <button class="sidebar-close" id="sidebar-close" aria-label="Close">✕</button>
+    </div>
+    <section class="sidebar-section">
+      <h3 class="sidebar-label">Load sample</h3>
+      <div class="digit-grid" id="digit-grid"></div>
+    </section>
+    <section class="sidebar-section">
+      <h3 class="sidebar-label">View</h3>
+      <label class="toggle-row">
+        <span>Mask mode</span>
+        <input type="checkbox" id="mask-toggle">
+        <span class="toggle-track"></span>
+      </label>
+      <label class="toggle-row">
+        <span>Show weights</span>
+        <input type="checkbox" id="weights-toggle" checked>
+        <span class="toggle-track"></span>
+      </label>
+    </section>
+    <section class="sidebar-section">
+      <h3 class="sidebar-label">Architecture</h3>
+      <p class="sidebar-meta">784 → (100) → 50 → 16 → 10</p>
+    </section>
+  </aside>
+
+  <div class="overlay" id="overlay"></div>
+
+  <main class="main">
+
+    <section class="panel panel-draw">
+      <div class="draw-section">
+        <h2 class="panel-label">Input</h2>
+        <div class="canvas-wrap">
+          <canvas id="draw-canvas" width="280" height="280"></canvas>
+        </div>
+        <p class="panel-hint">Draw a digit · or load a sample</p>
+        <div class="canvas-btns">
+          <button class="ctrl-btn" id="clear-btn">Clear</button>
+          <button class="ctrl-btn" id="random-btn">Random</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="pred-section">
+        <h2 class="panel-label">Prediction</h2>
+        <span class="prediction-digit" id="prediction-digit">—</span>
+        <div class="confidence-row" id="confidence-row"></div>
+      </div>
+    </section>
+
+    <section class="panel-net">
+      <canvas id="net-canvas"></canvas>
+    </section>
+
+  </main>
+
+  <script src="sketch.js"></script>
+</body>
+</html>
