@@ -34,6 +34,15 @@ def forward(x, weights, biases):
 def initialize_network(layer_sizes):
     # layer_sizes = [784, 100, 50, 16, 10]
     # return: weights (list of matrices), biases (list of vectors)
+    
     weights = []
     biases = []
-    pass
+
+    for fan_in, fan_out in zip(layer_sizes[:-1], layer_sizes[1:]):
+        limit = ___________________          # Xavier formula
+        w = np.random.uniform(___, ___, size=(fan_out, fan_in))
+        b = np.zeros(fan_out)               # biases start at 0, that's fine
+        weights.append(w)
+        biases.append(b)
+
+    return weights, biases
