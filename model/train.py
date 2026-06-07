@@ -117,23 +117,23 @@ def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
             y_batch = y_train[batch_start : batch_start + batch_size]
 
             # Step 3 — accumulate gradients across the batch
-            grad_w_total = ___  # same structure as weights, but all zeros
-            grad_b_total = ___  # same structure as biases, but all zeros
+            grad_w_total = [np.zeros_like(w) for w in weights]  # same structure as weights, but all zeros
+            grad_b_total = [np.zeros_like(b) for b in biases]  # same structure as biases, but all zeros
 
             for x, y in zip(x_batch, y_batch):
                 y_enc = one_hot(y)
-                activations, z_list = ___  # forward pass
-                gw, gb = ___              # backward pass
+                activations, z_list = forward(x, weights, biases)  # forward pass
+                gw, gb = backward(x, y_enc, activations, z_list, weights)              # backward pass
 
                 # accumulate
                 for i in range(len(weights)):
-                    grad_w_total[i] += ___
-                    grad_b_total[i] += ___
+                    grad_w_total[i] += gw[i]
+                    grad_b_total[i] += gb[i]
 
             # Step 4 — average and update
             for i in range(len(weights)):
-                weights[i] -= lr * (grad_w_total[i] / ___)
-                biases[i]  -= lr * (grad_b_total[i] / ___)
+                weights[i] -= lr * (grad_w_total[i] / len(x_batch))
+                biases[i]  -= lr * (grad_b_total[i] / len(x_batch))
 
         print(f"Epoch {epoch+1}/{epochs} done")
 
