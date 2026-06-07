@@ -155,6 +155,10 @@ document.addEventListener('keydown', e => {
             runNetwork();
         }
     }
+    
+    if (e.key === 'Escape') {
+        closeSidebar();
+    }
 });
 
 // ── Forward pass ──
