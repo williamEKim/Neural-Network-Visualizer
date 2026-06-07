@@ -161,4 +161,14 @@ def evaluate(weights, biases, x_test, y_test):
 def save_weights(weights, biases, path="model/weights.json"):
     # save weights and biases as JSON
     # hint: numpy arrays aren't JSON serializable — you need .tolist() on each one
-    pass
+    # hint: json.dump(data, f) writes to a file
+
+    data = {
+        "layers": [
+            {"weights": w.tolist(), "biases": b.tolist()}
+            for w, b in zip(weights, biases)
+        ]
+    }
+    
+    with open(path, "w") as f:
+        json.dump(data, f)
