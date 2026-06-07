@@ -39,8 +39,8 @@ def initialize_network(layer_sizes):
     biases = []
 
     for fan_in, fan_out in zip(layer_sizes[:-1], layer_sizes[1:]):
-        limit = ___________________          # Xavier formula
-        w = np.random.uniform(___, ___, size=(fan_out, fan_in))
+        limit = np.sqrt(6 / (fan_in + fan_out))          # Xavier formula
+        w = np.random.uniform(-limit, limit, size=(fan_out, fan_in))
         b = np.zeros(fan_out)               # biases start at 0, that's fine
         weights.append(w)
         biases.append(b)
