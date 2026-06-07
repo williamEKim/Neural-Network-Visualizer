@@ -3,7 +3,7 @@ import numpy as np
 from torchvision import datasets
 import torchvision.transforms as transforms
 
-# --- Activation functions ---
+# -------------------- Activation functions --------------------
 def sigmoid(z):
     # σ(z) = 1 / (1 + e^-z)
     return 1 / (1 + np.e ** (-z))
@@ -13,7 +13,7 @@ def sigmoid_prime(z):
     # σ'(z) = σ(z) * [1 - σ(z)]
     return  sigmoid(z) * (1 - sigmoid(z))
 
-# --- Forward pass ---
+# -------------------- Forward pass --------------------
 def forward(x, weights, biases):
     # x is a (784,) vector
     # weights is a list of weight matrices, one per layer
@@ -101,3 +101,40 @@ def backward(x, y_true, activations, z_list, weights):
     grad_biases.reverse()
 
     return grad_weights, grad_biases
+
+
+# -------------------- Training --------------------
+def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
+    for epoch in range(epochs):
+        # Step 1 — shuffle the data at the start of each epoch
+        indices = np.random.permutation(len(x_train))
+        x_train = x_train[indices]
+        y_train = y_train[indices]
+
+        # Step 2 — split into mini-batches
+        for batch_start in range(0, len(x_train), batch_size):
+            x_batch = x_train[batch_start : batch_start + batch_size]
+            y_batch = y_train[batch_start : batch_start + batch_size]
+
+            # Step 3 — accumulate gradients across the batch
+            grad_w_total = ___  # same structure as weights, but all zeros
+            grad_b_total = ___  # same structure as biases, but all zeros
+
+            for x, y in zip(x_batch, y_batch):
+                y_enc = one_hot(y)
+                activations, z_list = ___  # forward pass
+                gw, gb = ___              # backward pass
+
+                # accumulate
+                for i in range(len(weights)):
+                    grad_w_total[i] += ___
+                    grad_b_total[i] += ___
+
+            # Step 4 — average and update
+            for i in range(len(weights)):
+                weights[i] -= lr * (grad_w_total[i] / ___)
+                biases[i]  -= lr * (grad_b_total[i] / ___)
+
+        print(f"Epoch {epoch+1}/{epochs} done")
+
+    return weights, biases
