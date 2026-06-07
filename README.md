@@ -52,7 +52,7 @@ Built as a companion to [3Blue1Brown's neural network series](https://www.youtub
 │   └── requirements.txt
 ├── index.html
 ├── style.css
-├── sketch.js         # forward pass + visualization
+├── sketch.js             # forward pass + visualization
 ├── data/                 # MNIST dataset (downloaded automatically)
 ├── samples.json          # 100 sample images for the UI
 └── run_model.sh          # setup + training script
