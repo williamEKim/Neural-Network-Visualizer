@@ -3,6 +3,7 @@ import numpy as np
 from torchvision import datasets
 import torchvision.transforms as transforms
 import json
+import copy
 
 # -------------------- Activation functions --------------------
 def sigmoid(z):
@@ -169,6 +170,49 @@ def save_weights(weights, biases, path="model/weights.json"):
             for w, b in zip(weights, biases)
         ]
     }
-    
+
     with open(path, "w") as f:
         json.dump(data, f)
+
+
+if __name__ == "__main__":
+    # Loads MNIST
+    train_data = datasets.MNIST(root='./data', train=True, download=True)
+    test_data  = datasets.MNIST(root='./data', train=False, download=True)
+
+    x_train = train_data.data.numpy()    # shape: (60000, 28, 28)
+    x_train = x_train.reshape(-1, 784)   # flattens the shape from 28x28 to (60000, 784)
+    y_train = train_data.targets.numpy() # shape: (60000,)
+
+    x_test = test_data.data.numpy().reshape(-1, 784) / 255.0
+    y_test = test_data.targets.numpy()
+
+    # Normalizes pixel values to 0.0–1.0
+    x_train = x_train / 255.0   # pixel values varies [0.0, 255.0] so to normalize it, divide it by 255.0
+
+    # Initializes the network
+    LAYER_SIZES = [784, 100, 50, 16, 10]
+    weights, biases = initialize_network(LAYER_SIZES)
+
+    # Trains + Evaluates and saves best weights
+    best_accuracy = 0.0
+    best_weights = None
+    best_biases = None
+
+    for epoch in range(10):
+        # train for one epoch
+        weights, biases = train(weights, biases, x_train, y_train, epochs=1, lr=0.01, batch_size=32)
+
+        # evaluate
+        accuracy = evaluate(weights, biases, x_test, y_test)
+        print(f"Epoch {epoch+1}: accuracy = {accuracy:.4f}")
+
+        # save if best
+        if accuracy > best_accuracy:
+            best_accuracy = accuracy
+            best_weights = copy.deepcopy(weights)
+            best_biases = copy.deepcopy(biases)
+            save_weights(weights, biases)
+            print(f"  → new best! saved.")
+
+    print(f"Final best accuracy: {best_accuracy:.4f}")
