@@ -41,8 +41,19 @@ def initialize_network(layer_sizes):
     for fan_in, fan_out in zip(layer_sizes[:-1], layer_sizes[1:]):
         limit = np.sqrt(6 / (fan_in + fan_out))          # Xavier formula
         w = np.random.uniform(-limit, limit, size=(fan_out, fan_in))
-        b = np.zeros(fan_out)               # biases start at 0, that's fine
+        b = np.zeros(fan_out)                            # biases start at 0, that's fine
         weights.append(w)
         biases.append(b)
 
     return weights, biases
+
+def one_hot(label, num_classes=10):
+    # label is an int 0-9
+    # return a (10,) vector of zeros with a 1 at index label
+    pass
+
+def mse_loss(y_pred, y_true):
+    # y_pred is the output activation (10,) vector
+    # y_true is the one-hot encoded label (10,) vector
+    # return a scalar loss value
+    pass
