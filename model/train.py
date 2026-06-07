@@ -50,10 +50,15 @@ def initialize_network(layer_sizes):
 def one_hot(label, num_classes=10):
     # label is an int 0-9
     # return a (10,) vector of zeros with a 1 at index label
-    pass
+    v = np.zeros(num_classes)
+    v[label] = 1.0
+    return v
+
+
 
 def mse_loss(y_pred, y_true):
     # y_pred is the output activation (10,) vector
     # y_true is the one-hot encoded label (10,) vector
+    # L = (1/n) * Σ (y_pred - y_true)^2
     # return a scalar loss value
-    pass
+    return (1/len(y_pred)) * np.sum((y_pred - y_true) ** 2)
