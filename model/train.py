@@ -30,3 +30,10 @@ def forward(x, weights, biases):
         activation_list.append(a)
 
     return activation_list
+
+def initialize_network(layer_sizes):
+    # layer_sizes = [784, 100, 50, 16, 10]
+    # return: weights (list of matrices), biases (list of vectors)
+    weights = []
+    biases = []
+    pass
