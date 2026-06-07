@@ -2,6 +2,7 @@
 import numpy as np
 from torchvision import datasets
 import torchvision.transforms as transforms
+import json
 
 # -------------------- Activation functions --------------------
 def sigmoid(z):
@@ -67,6 +68,7 @@ def mse_loss(y_pred, y_true):
     return (1/len(y_pred)) * np.sum((y_pred - y_true) ** 2)
 
 
+# -------------------- Back Propagation --------------------
 def backward(x, y_true, activations, z_list, weights):
     # x           — original input (784,)
     # y_true      — one-hot label (10,)
@@ -123,7 +125,7 @@ def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
             for x, y in zip(x_batch, y_batch):
                 y_enc = one_hot(y)
                 activations, z_list = forward(x, weights, biases)  # forward pass
-                gw, gb = backward(x, y_enc, activations, z_list, weights)              # backward pass
+                gw, gb = backward(x, y_enc, activations, z_list, weights)  # backward pass
 
                 # accumulate
                 for i in range(len(weights)):
@@ -138,3 +140,25 @@ def train(weights, biases, x_train, y_train, epochs=10, lr=0.01, batch_size=32):
         print(f"Epoch {epoch+1}/{epochs} done")
 
     return weights, biases
+
+# -------------------- Evaluation --------------------
+def evaluate(weights, biases, x_test, y_test):
+    # run forward on every test example
+    # return accuracy as a float 0.0-1.0
+    # hint: np.argmax() picks the index of the highest value in a vector
+
+    correct_pred = 0
+
+    for x, y in zip(x_test, y_test):
+        activations, _ = forward(x, weights, biases)  # forward pass
+        labeled = np.argmax(activations[-1])     # picks the index with value 1 -- which is a label
+
+        if labeled == y:
+            correct_pred += 1
+
+    return correct_pred / len(x_test)
+
+def save_weights(weights, biases, path="model/weights.json"):
+    # save weights and biases as JSON
+    # hint: numpy arrays aren't JSON serializable — you need .tolist() on each one
+    pass
